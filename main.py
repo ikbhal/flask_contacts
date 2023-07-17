@@ -12,10 +12,9 @@ def get_contacts():
 @app.route('/api/contacts', methods=['POST'])
 def add_contact():
     contact = request.get_json()
-    contact.id = len(contacts)
+    contact['id'] = len(contacts)
     contacts.append(contact)
-    return jsonify({'message': 'Contact added successfully.',
-                    'data': jsonify((contact))})
+    return jsonify({'message': 'Contact added successfully.'})
 
 @app.route('/api/contacts/<int:contact_id>', methods=['PUT'])
 def edit_contact(contact_id):

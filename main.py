@@ -25,8 +25,10 @@ def edit_contact(contact_id):
 
 @app.route('/api/contacts/<int:contact_id>', methods=['DELETE'])
 def delete_contact(contact_id):
-    del contacts[contact_id]
+    global contacts
+    contacts = [contact for contact in contacts if contact['id'] != contact_id]
     return jsonify({'message': 'Contact deleted successfully.'})
+
 
 @app.route('/')
 @app.route('/contacts')

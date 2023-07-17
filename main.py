@@ -1,25 +1,21 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, redirect
 
 app = Flask(__name__)
 
 # In-memory data structures
 contacts = []
-pages = []
-
-
 # Contacts API routes
-
 @app.route('/api/contacts', methods=['GET'])
 def get_contacts():
     return jsonify(contacts)
 
-
 @app.route('/api/contacts', methods=['POST'])
 def add_contact():
     contact = request.get_json()
+    contact.id = len(contacts)
     contacts.append(contact)
-    return jsonify({'message': 'Contact added successfully.'})
-
+    return jsonify({'message': 'Contact added successfully.',
+                    'data': jsonify((contact))})
 
 @app.route('/api/contacts/<int:contact_id>', methods=['PUT'])
 def edit_contact(contact_id):
@@ -33,44 +29,30 @@ def delete_contact(contact_id):
     del contacts[contact_id]
     return jsonify({'message': 'Contact deleted successfully.'})
 
-
-# Pages API routes
-
-@app.route('/api/pages', methods=['GET'])
-def get_pages():
-    return jsonify(pages)
-
-
-@app.route('/api/pages', methods=['POST'])
-def add_page():
-    page = request.get_json()
-    pages.append(page)
-    return jsonify({'message': 'Page added successfully.'})
-
-
-@app.route('/api/pages/<int:page_id>', methods=['PUT'])
-def edit_page(page_id):
-    page = request.get_json()
-    pages[page_id] = page
-    return jsonify({'message': 'Page updated successfully.'})
-
-
-@app.route('/api/pages/<int:page_id>', methods=['DELETE'])
-def delete_page(page_id):
-    del pages[page_id]
-    return jsonify({'message': 'Page deleted successfully.'})
-
-
-# HTML page routes
-
+@app.route('/')
 @app.route('/contacts')
 def contacts_page():
     return render_template('contacts.html', contacts=contacts)
 
+@app.route('/contacts/add', methods=['GET', 'POST'])
+def add_contact_page():
+    if request.method == 'POST':
+        name = request.form['name']
+        mobile = request.form['mobile']
+        contact = {'name': name, 'mobile': mobile}
+        contacts.append(contact)
+        return redirect('/contacts')
+    return render_template('add_contact.html')
 
-@app.route('/pages')
-def pages_page():
-    return render_template('pages.html', pages=pages)
+@app.route('/contacts/edit/<int:contact_id>', methods=['GET', 'POST'])
+def edit_contact_page(contact_id):
+    if request.method == 'POST':
+        name = request.form['name']
+        mobile = request.form['mobile']
+        contact = {'name': name, 'mobile': mobile}
+        contacts[contact_id] = contact
+        return redirect('/contacts')
+    return render_template('edit_contact.html', contact=contacts[contact_id])
 
 
 if __name__ == '__main__':
